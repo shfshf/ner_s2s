@@ -1,4 +1,4 @@
-# seq2annotation
+# NER_S2S
 
 基于 TensorFlow 的通用序列标注算法库（目前包含 `BiLSTM+CRF` 和 `IDCNN+CRF`，更多算法正在持续添加中）实现中文分词（Tokenizer / segmentation）、词性标注（Part Of Speech, POS）和命名实体识别（Named Entity Recognition, NER）等序列标注任务。
 

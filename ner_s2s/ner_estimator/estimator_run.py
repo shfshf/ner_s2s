@@ -1,13 +1,13 @@
 from ioflow.configure import read_configure
 from ioflow.corpus import get_corpus_processor
-from ner_estimator.input import build_input_func, generate_tagset
-from ner_estimator.model import Model
+from ner_s2s.ner_estimator.input import build_input_func, generate_tagset
+from ner_s2s.ner_estimator.model import Model
 
 from typing import Any
 from deliverable_model.request import Request
 from deliverable_model.response import Response
 from deliverable_model.utils import create_dir_if_needed
-from ner_estimator.deliver_utils import export_as_deliverable_model
+from ner_s2s.ner_estimator.deliver_utils import export_as_deliverable_model
 
 
 def converter_for_request(request: Request) -> Any:

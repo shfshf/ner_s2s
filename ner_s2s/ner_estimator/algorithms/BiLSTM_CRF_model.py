@@ -1,5 +1,5 @@
 import tensorflow as tf
-from ner_estimator.algorithms.model import Model
+from ner_s2s.ner_estimator.algorithms.model import Model
 
 
 class BilstmCrfModel(Model):

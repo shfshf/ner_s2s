@@ -7,7 +7,7 @@ from typing import Dict, List
 
 import tensorflow as tf
 
-from ner_keras.utils import class_from_module_path, load_hook
+from ner_s2s.ner_estimator.utils import class_from_module_path, load_hook
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 from tokenizer_tools.tagset.NER.BILUO import BILUOEncoderDecoder
 

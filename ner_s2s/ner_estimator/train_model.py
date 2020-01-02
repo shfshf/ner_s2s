@@ -3,8 +3,8 @@ import os
 
 import tensorflow as tf
 
-from ner_estimator import utils
-from ner_estimator.utils import class_from_module_path
+from ner_s2s.ner_estimator import utils
+from ner_s2s.ner_estimator.utils import class_from_module_path
 from tokenizer_tools.hooks import TensorObserveHook
 
 

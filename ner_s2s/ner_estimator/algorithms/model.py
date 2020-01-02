@@ -2,7 +2,7 @@ from pathlib import Path
 
 import tensorflow as tf
 import numpy as np
-from ner_estimator.metrics import precision, recall, f1
+from ner_s2s.ner_estimator.metrics import precision, recall, f1
 from tokenizer_tools.metrics import correct_rate
 
 
