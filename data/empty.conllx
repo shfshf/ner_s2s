@@ -1,0 +1,58 @@
+#	{"label": "INTENT_Apps_Weather_Inquiry", "id": "5c85c6f8d92f1f3648ec3aea"}
+看	O
+下	O
+陕	B-城市名
+西	L-城市名
+天	O
+气	O
+。	O
+
+#	{"label": "INTENT_Apps_Weather_Inquiry", "id": "5c85c6f8d92f1f3648ec3aeb"}
+请	O
+查	O
+今	B-日期
+天	L-日期
+的	O
+天	O
+气	O
+。	O
+
+#	{"label": "INTENT_Apps_Weather_Inquiry", "id": "5c85c6f8d92f1f3648ec3aec"}
+乐	B-城市名
+至	L-城市名
+天	O
+气	O
+怎	O
+么	O
+样	O
+？	O
+
+#	{"label": "INTENT_Apps_Weather_Inquiry", "id": "5c85c6f8d92f1f3648ec3aed"}
+乐	B-城市名
+至	L-城市名
+的	O
+天	O
+气	O
+。	O
+
+#	{"label": "INTENT_Apps_Weather_Inquiry", "id": "5c85c6f8d92f1f3648ec3aef"}
+请	O
+查	O
+看	O
+天	O
+气	O
+预	O
+报	O
+。	O
+
+#	{"label": "INTENT_Apps_Weather_Inquiry", "id": "5c85c6f8d92f1f3648ec3af0"}
+乐	B-城市名
+都	L-城市名
+后	B-日期
+天	L-日期
+天	O
+气	O
+怎	O
+么	O
+样	O
+？	O
