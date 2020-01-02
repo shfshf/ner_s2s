@@ -1,0 +1,17 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Example user template template
+### Example user template
+
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
+将删除 .DS_Store
+将删除 data/.DS_Store
+将删除 ner_estimator/__pycache__/
+将删除 ner_estimator/algorithms/.DS_Store
+将删除 ner_estimator/algorithms/__pycache__/
+将删除 ner_estimator/metrics/__pycache__/
+将删除 ner_keras/__pycache__/
+将删除 ner_keras_bert/__pycache__/
