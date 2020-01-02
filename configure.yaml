@@ -8,7 +8,7 @@ shuffle_pool_size: 1000
 
 # model configure
 batch_size: 32
-epochs: 2
+epochs: 3
 intent_field: label
 max_steps:
 max_steps_without_increase: 15000
@@ -23,7 +23,7 @@ bilstm_stack_config: [
 use_batch_normalization_after_embedding: false
 use_batch_normalization_after_bilstm: false
 crf_params: {use_boundary: true}
-learning_rate:
+learning_rate: 0.001
 
 # Data output
 result_dir: "./results"

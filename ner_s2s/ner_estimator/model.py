@@ -5,7 +5,7 @@ import numpy as np
 from ner_s2s.ner_estimator.train_model import train_model
 from ner_s2s.ner_estimator.algorithms.BiLSTM_CRF_model import BilstmCrfModel
 
-from ner_s2s.ner_estimator import utils
+from ner_s2s import utils
 
 
 class Model(object):

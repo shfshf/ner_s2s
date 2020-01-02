@@ -11,7 +11,7 @@ from tensorflow.python.keras.models import Sequential
 from ioflow.configure import read_configure
 from ioflow.corpus import get_corpus_processor
 from ner_s2s.ner_keras.input import generate_tagset, Lookuper, index_table_from_file
-from ner_s2s.ner_keras.utils import create_dir_if_needed, create_file_dir_if_needed
+from ner_s2s.utils import create_dir_if_needed, create_file_dir_if_needed
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 from tf_attention_layer.layers.global_attentioin_layer import GlobalAttentionLayer
 from tf_crf_layer.layer import CRF
@@ -20,7 +20,7 @@ from tf_crf_layer.metrics import (
     SequenceCorrectness,
     SequenceSpanAccuracy
 )
-from ner_s2s.ner_keras.deliver_utils import export_as_deliverable_model
+from ner_s2s.deliver_utils import export_as_deliverable_model
 
 # tf.enable_eager_execution()
 
