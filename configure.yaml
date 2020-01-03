@@ -7,8 +7,8 @@ vocabulary_file: "./data/unicode_char_list.txt"
 shuffle_pool_size: 1000
 
 # model configure
-batch_size: 32
-epochs: 3
+batch_size: 64
+epochs: 10
 intent_field: label
 max_steps:
 max_steps_without_increase: 15000
@@ -17,7 +17,7 @@ lstm_size: 100
 use_attention_layer: false
 max_sentence_len: 45
 bilstm_stack_config: [
-{units: 100, dropout: 0.2, recurrent_dropout: 0.5},
+{units: 100, recurrent_activation: 'hard_sigmoid', dropout: 0.2, recurrent_dropout: 0.5},
 # {units: 100, activation: 'seq2annotation.tf.python.keras.activations.relu6', recurrent_activation: 'seq2annotation.tf.python.keras.activations.relu6'},
 ]
 use_batch_normalization_after_embedding: false

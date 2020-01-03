@@ -20,13 +20,15 @@ from tf_crf_layer.metrics import (
     SequenceCorrectness,
     SequenceSpanAccuracy
 )
+
 from ner_s2s.deliver_utils import export_as_deliverable_model
 
 # tf.enable_eager_execution()
 
 
 def main():
-    config = read_configure()  # ioflow
+
+    config = read_configure()   # ioflow
     corpus = get_corpus_processor(config)
     corpus.prepare()  # ?
     train_data_generator_func = corpus.get_generator_func(corpus.TRAIN)
@@ -80,6 +82,7 @@ def main():
     test_x, test_y = preprocss(eval_data, MAX_SENTENCE_LEN)
 
     EPOCHS = config["epochs"]
+    BATCH_SIZE = config["batch_size"]
     EMBED_DIM = config["embedding_dim"]
     USE_ATTENTION_LAYER = config.get("use_attention_layer", False)
     BiLSTM_STACK_CONFIG = config.get("bilstm_stack_config", [])
@@ -145,6 +148,7 @@ def main():
     model.fit(
         train_x,
         train_y,
+        batch_size=BATCH_SIZE,
         epochs=EPOCHS,
         validation_data=[test_x, test_y],
         callbacks=callbacks_list,
