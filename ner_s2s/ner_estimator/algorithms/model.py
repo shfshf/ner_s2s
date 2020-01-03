@@ -84,17 +84,26 @@ class Model(object):
         # glove = np.load(params['glove'])['embeddings']  # np.array
 
         # training the embedding during training
-        glove = np.zeros(
-            (self.params["embedding_vocabulary_size"], self.params["embedding_dim"]),
-            dtype=np.float32,
+        # glove = np.zeros(
+        #     (self.params["embedding_vocabulary_size"], self.params["embedding_dim"]),
+        #     dtype=np.float32,
+        # )
+        #
+        # # Add OOV word embedding
+        # embedding_array = np.vstack([glove, [[0.0] * self.params["embedding_dim"]]])
+        #
+        # embedding_variable = tf.Variable(
+        #     embedding_array, dtype=tf.float32, trainable=True
+        # )
+
+        embedding_variable = tf.get_variable(
+            'embedding_variable',
+            shape=(self.params["embedding_vocabulary_size"] + 1, self.params["embedding_dim"]),
+            dtype=tf.float32,
+            initializer=tf.contrib.layers.xavier_initializer(),
+            trainable=True
         )
 
-        # Add OOV word embedding
-        embedding_array = np.vstack([glove, [[0.0] * self.params["embedding_dim"]]])
-
-        embedding_variable = tf.Variable(
-            embedding_array, dtype=tf.float32, trainable=True
-        )
         embeddings = tf.nn.embedding_lookup(embedding_variable, word_ids)
 
         return embeddings
@@ -267,9 +276,8 @@ class Model(object):
                     )
 
             elif self.mode == tf.estimator.ModeKeys.TRAIN:
-                train_op = tf.train.AdamOptimizer(
-                    **self.params.get("optimizer_params", {})
-                ).minimize(loss, global_step=tf.train.get_or_create_global_step())
+                train_op = tf.train.AdamOptimizer(self.params["learning_rate"]
+                                                  ).minimize(loss, global_step=tf.train.get_or_create_global_step())
                 if self.params["use_tpu"]:
                     train_op = tf.contrib.tpu.CrossShardOptimizer(train_op)
 
