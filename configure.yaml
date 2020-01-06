@@ -7,8 +7,8 @@ vocabulary_file: "./data/unicode_char_list.txt"
 shuffle_pool_size: 1000
 
 # model configure
-batch_size: 64
-epochs: 18
+batch_size: 32
+epochs: 8
 dropout: 0.5
 intent_field: label
 max_steps:
@@ -25,7 +25,7 @@ bilstm_stack_config: [
 use_batch_normalization_after_embedding: false
 use_batch_normalization_after_bilstm: false
 crf_params: {use_boundary: true}
-learning_rate: 0.001
+learning_rate: 0.01
 
 # Data output
 result_dir: "./results"
