@@ -15,13 +15,14 @@ install_requires = [
     "tensorflow>=1.15.0,<2.0.0",
     "deliverable-model",
     "gunicorn",
-    "micro_toolkit"
+    "micro_toolkit",
+    "mlflow==1.3.0"
 ]
 
 
 setup(
     name=os.getenv("_PKG_NAME", "ner_s2s"),  # _PKG_NAME will be used in Makefile for dev release
-    version="0.0.2",
+    version="0.0.3",
     packages=setuptools.find_packages(),
     include_package_data=True,
     url="https://github.com/shfshf/ner_s2s",
