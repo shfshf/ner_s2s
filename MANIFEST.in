@@ -1,0 +1,1 @@
+include ner_s2s/data/unicode_char_list.txt
