@@ -1,6 +1,6 @@
 from ioflow.configure import read_configure
 from ioflow.corpus import get_corpus_processor
-from ner_s2s.ner_estimator.input import build_input_func, generate_tagset
+from ner_s2s.input import build_input_func, generate_tagset
 from ner_s2s.ner_estimator.model import Model
 
 from typing import Any

@@ -7,10 +7,11 @@ from tensorflow.python.keras.layers import (
     BatchNormalization,
 )
 from tensorflow.python.keras.models import Sequential
+from tensorflow.python.keras import optimizers
 
 from ioflow.configure import read_configure
 from ioflow.corpus import get_corpus_processor
-from ner_s2s.ner_keras.input import generate_tagset, Lookuper, index_table_from_file
+from ner_s2s.input import generate_tagset, Lookuper, index_table_from_file
 from ner_s2s.utils import create_dir_if_needed, create_file_dir_if_needed
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 from tf_attention_layer.layers.global_attentioin_layer import GlobalAttentionLayer
@@ -93,6 +94,7 @@ def main():
         "use_batch_normalization_after_bilstm", False
     )
     CRF_PARAMS = config.get("crf_params", {})
+    OPTIMIZER_PARAMS = config.get("optimizer_params", {})
 
     vacab_size = vocabulary_lookuper.size()
     tag_size = tag_lookuper.size()
@@ -143,8 +145,11 @@ def main():
     loss_func = ConditionalRandomFieldLoss()
     # loss_func = crf_loss
 
-    model.compile("adam", loss={"crf": loss_func}, metrics=metrics_list)
-    # model.compile("nadam", loss={"crf": loss_func}, metrics=metrics_list)
+    optimizer = optimizers.Adam(**OPTIMIZER_PARAMS)
+    # optimizer = optimizers.Nadam(**OPTIMIZER_PARAMS)
+
+    model.compile(optimizer=optimizer, loss={"crf": loss_func}, metrics=metrics_list)
+
     model.fit(
         train_x,
         train_y,
