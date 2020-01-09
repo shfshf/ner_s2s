@@ -101,6 +101,7 @@ class Model(object):
             shape=(self.params["embedding_vocabulary_size"] + 1, self.params["embedding_dim"]),
             dtype=tf.float32,
             initializer=tf.contrib.layers.xavier_initializer(),
+            regularizer=tf.contrib.layers.l2_regularizer(self.params["regularizer_rate"]),
             trainable=True
         )
 
@@ -169,6 +170,10 @@ class Model(object):
             )
 
         loss = tf.reduce_mean(-log_likelihood)
+
+        # regularizer = tf.contrib.layers.l2_regularizer(0.001)
+        # reg = regularizer(embedding_variable)
+        # loss += reg
 
         return loss
 

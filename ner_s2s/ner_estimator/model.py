@@ -78,6 +78,7 @@ class Model(object):
             "train_hook": {},
             "shuffle_pool_size": 30,
             "embedding_dim": 64,
+            "regularizer_rate": 0.001,
         }
 
         vocab_data_file = self.native_config.get("vocabulary_file")
