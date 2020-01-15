@@ -8,7 +8,7 @@ shuffle_pool_size: 1000
 
 # model configure
 batch_size: 32
-epochs: 8
+epochs: 1
 dropout: 0.5
 intent_field: label
 max_steps:
