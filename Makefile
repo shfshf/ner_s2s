@@ -129,14 +129,14 @@ build_docker_nightly_build: build_docker_nightly_build_trainer build_docker_nigh
 .PHONY: build_docker_nightly_build_trainer
 build_docker_nightly_build_trainer: dist
 	cp -r dist docker/nightly/trainer/
-	docker rmi -f uhub.service.ucloud.cn/algorithm_train/shf_ner_trainer
-	docker build --no-cache --force-rm --tag uhub.service.ucloud.cn/algorithm_train/shf_ner_trainer --file docker/nightly/trainer/Dockerfile docker/nightly/trainer/
+	docker rmi -f shf_ner_trainer
+	docker build --no-cache --force-rm --tag shf_ner_trainer --file docker/nightly/trainer/Dockerfile docker/nightly/trainer/
 
 .PHONY: build_docker_nightly_build_server
 build_docker_nightly_build_server: dist
 	cp -r dist docker/nightly/server/
-	docker rmi -f uhub.service.ucloud.cn/algorithm_train/shf_ner_server
-	docker build --no-cache --force-rm --tag uhub.service.ucloud.cn/algorithm_train/shf_ner_server --file docker/nightly/server/Dockerfile docker/nightly/server/
+	docker rmi -f shf_ner_server
+	docker build --no-cache --force-rm --tag shf_ner_server --file docker/nightly/server/Dockerfile docker/nightly/server/
 
 .PHONY: run_docker_nightly_build_server
 run_docker_nightly_build_server:
