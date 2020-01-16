@@ -1,0 +1,38 @@
+# Docker
+# Build a Docker image 
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- master
+- ner_s2s-azure
+
+pool:
+  vmImage: 'ubuntu-latest'
+strategy:
+  matrix:
+    Python36:
+      python.version: '3.6'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '$(python.version)'
+  displayName: 'Use Python $(python.version)'
+
+- script: |
+    pip install -e .
+  displayName: 'Install myself'
+
+- script: |
+    make test
+  displayName: 'run test'
+
+- script: |
+    make dist
+  displayName: 'build pacakge'
+  
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(System.DefaultWorkingDirectory)'
+    artifact: 'ner_s2s_package'
+  displayName: 'Publish artifact'
