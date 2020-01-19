@@ -29,6 +29,10 @@ steps:
   displayName: 'Install depdnencies'
 
 - script: |
+    make test
+  displayName: 'run test'
+
+- script: |
     make dist
   displayName: 'build pacakge'
   
