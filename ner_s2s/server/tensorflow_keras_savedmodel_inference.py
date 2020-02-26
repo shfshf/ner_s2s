@@ -3,10 +3,10 @@ from typing import List
 import keras
 import tensorflow as tf
 
-from seq2annotation.input import Lookuper
+from ner_s2s.input import Lookuper
 from tokenizer_tools.tagset.NER.BILUO import BILUOSequenceEncoderDecoder
 from tokenizer_tools.tagset.offset.sequence import Sequence
-from tensorflow.contrib import predictor
+# from tensorflow.contrib import predictor
 
 
 from tokenizer_tools.tagset.exceptions import TagSetDecodeError

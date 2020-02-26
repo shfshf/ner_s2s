@@ -1,7 +1,7 @@
 import keras
 from tensorflow.contrib import predictor
 
-from seq2annotation.server.inference.inference_base import InferenceBase
+from ner_s2s.server.inference.inference_base import InferenceBase
 from tokenizer_tools.tagset.NER.BILUO import BILUOSequenceEncoderDecoder
 
 decoder = BILUOSequenceEncoderDecoder()

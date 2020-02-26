@@ -12,7 +12,7 @@ decoder = BILUOSequenceEncoderDecoder()
 
 from tf_crf_layer.metrics.crf_accuracy import crf_accuracy
 from tf_crf_layer.metrics.sequence_span_accuracy import sequence_span_accuracy
-from seq2annotation.input import generate_tagset, Lookuper
+from ner_s2s.input import generate_tagset, Lookuper
 
 
 class Inference(object):

@@ -1,7 +1,7 @@
 from tensorflow.python import keras
 
-from seq2annotation.input import Lookuper
-from seq2annotation.server.inference.inference_base import InferenceBase
+from ner_s2s.input import Lookuper
+from ner_s2s.server.inference.inference_base import InferenceBase
 
 
 class KerasInferenceBase(InferenceBase):
