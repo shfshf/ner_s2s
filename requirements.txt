@@ -39,7 +39,6 @@ MarkupSafe==1.1.1
 micro-toolkit==0.5.0
 mlflow==1.3.0
 more-itertools==8.1.0
--e git+git@github.com:/shfshf/ner_s2s.git@31fbbc6ca6199fdb2b317c9f1a97f316cb1600a6#egg=ner_s2s
 numpy==1.18.1
 opt-einsum==3.1.0
 packaging==20.0
@@ -61,8 +60,7 @@ requests==2.22.0
 scikit-learn==0.22.1
 scipy==1.4.1
 seq2annotation==0.9.1
-# seq2annotation-for-deliverable==0.1.0
-git+https://github.com/howl-anderson/seq2annotation_for_deliverable.git
+seq2annotation-for-deliverable==0.1.0
 simplejson==3.17.0
 six==1.13.0
 smmap2==2.0.5
