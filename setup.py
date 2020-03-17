@@ -22,7 +22,6 @@ install_requires = [
     "gunicorn",
     "micro_toolkit",
     "mlflow==1.3.0",
-    # "git+https://github.com/howl-anderson/seq2annotation_for_deliverable.git"
 ]
 
 
