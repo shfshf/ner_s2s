@@ -79,9 +79,20 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
             predict_batch_size=estimator_params["batch_size"],
         )
     else:
-        estimator = tf.estimator.Estimator(
-            model_fn, instance_model_dir, cfg, estimator_params
-        )
+        if config.get("warm_start_dir") is not None:
+            ws = tf.estimator.WarmStartSettings(
+                ckpt_to_initialize_from=config.get("warm_start_dir"),
+                vars_to_warm_start=['input/Variable_1', 'domain/lstm_fused_cell'],
+                # vars_to_warm_start='.*',
+                var_name_to_vocab_info=None,
+                var_name_to_prev_var_name=None)
+            estimator = tf.estimator.Estimator(
+                model_fn, instance_model_dir, cfg, estimator_params, warm_start_from=ws
+            )
+        else:
+            estimator = tf.estimator.Estimator(
+                model_fn, instance_model_dir, cfg, estimator_params, warm_start_from=None
+            )
 
     # Path(estimator.eval_dir()).mkdir(parents=True, exist_ok=True)
     utils.create_dir_if_needed(estimator.eval_dir())

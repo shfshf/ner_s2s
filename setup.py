@@ -3,6 +3,11 @@ import os
 import setuptools
 from setuptools import setup
 
+tests_requires = [
+    "pytest",
+    "requests",
+]
+
 install_requires = [
     "numpy",
     "keras",
@@ -16,7 +21,8 @@ install_requires = [
     "deliverable-model",
     "gunicorn",
     "micro_toolkit",
-    "mlflow==1.3.0"
+    "mlflow==1.3.0",
+    # "git+https://github.com/howl-anderson/seq2annotation_for_deliverable.git"
 ]
 
 

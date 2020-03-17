@@ -5,6 +5,8 @@ test: "./data/test.conllx"
 tags: "./data/entity.txt"
 vocabulary_file: "./data/unicode_char_list.txt"
 shuffle_pool_size: 1000
+warm_start_dir:
+# "/Users/shf/test/docker/seq2annotation/output/model_dir/BilstmCrfModel-64-0.001-None-15000"
 
 # model configure
 batch_size: 32

@@ -208,20 +208,22 @@ class Model(object):
         raise NotImplementedError
 
     def __call__(self):
-        indices, num_tags, word_ids, nwords = self.input_layer()
-        # indices, num_tags, word_ids, nwords = self.tpu_input_layer()
+        with tf.variable_scope("input"):
+            indices, num_tags, word_ids, nwords = self.input_layer()
+            # indices, num_tags, word_ids, nwords = self.tpu_input_layer()
 
-        embeddings = self.embedding_layer(word_ids)
+            embeddings = self.embedding_layer(word_ids)
 
-        data = self.call(embeddings, nwords)
+        with tf.variable_scope("domain"):
+            data = self.call(embeddings, nwords)
 
-        data = self.dropout_layer(data)
-        logits = self.dense_layer(data, num_tags)
+            data = self.dropout_layer(data)
+            logits = self.dense_layer(data, num_tags)
 
-        crf_params = tf.get_variable("crf", [num_tags, num_tags], dtype=tf.float32)
+            crf_params = tf.get_variable("crf", [num_tags, num_tags], dtype=tf.float32)
 
-        pred_ids = self.crf_decode_layer(logits, crf_params, nwords)
-        pred_strings = self.id2tag(pred_ids, name="predict")
+            pred_ids = self.crf_decode_layer(logits, crf_params, nwords)
+            pred_strings = self.id2tag(pred_ids, name="predict")
 
         # word_strings = self.id2word(word_ids, name='word_strings')
 
