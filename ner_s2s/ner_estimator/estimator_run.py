@@ -4,10 +4,13 @@ from ner_s2s.input import build_input_func, generate_tagset
 from ner_s2s.ner_estimator.model import Model
 
 from typing import Any
-from deliverable_model.request import Request
-from deliverable_model.response import Response
 from deliverable_model.utils import create_dir_if_needed
 from ner_s2s.deliver_utils import export_as_deliverable_model
+from deliverable_model.converter_base import ConverterBase
+from seq2annotation_for_deliverable.main import (
+    ConverterForRequest,
+    ConverterForResponse,
+)
 
 from tensorflow.python.saved_model import tag_constants
 import mlflow
@@ -16,24 +19,6 @@ import mlflow.tensorflow
 
 # Enable auto-logging to MLflow to capture TensorBoard metrics.
 mlflow.tensorflow.autolog()
-
-
-def converter_for_request(request: Request) -> Any:
-    from micro_toolkit.data_process.text_sequence_padding import TextSequencePadding
-
-    tsp = TextSequencePadding('<pad>')
-    return {
-        "words": tsp.fit(request.query),
-        "words_len": [
-            len(list(filter(lambda x: x != 0.0, text))) for text in request.query
-        ],
-    }
-
-
-def converter_for_response(response: Any) -> Response:
-    from deliverable_model.response import Response
-
-    return Response(response["tags"])
 
 
 def main():
@@ -83,8 +68,8 @@ def main():
     export_as_deliverable_model(
         create_dir_if_needed(config["deliverable_model_dir"]),
         tensorflow_saved_model=final_saved_model,
-        converter_for_request=converter_for_request,
-        converter_for_response=converter_for_response,
+        converter_for_request=ConverterForRequest(),
+        converter_for_response=ConverterForResponse(),
         addition_model_dependency=["micro_toolkit"]
     )
 
