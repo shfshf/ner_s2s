@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-from ner_s2s.server.inference.keras_inference_base import KerasInferenceBase
+from seq2annotation.server.inference.keras_inference_base import KerasInferenceBase
 from tf_crf_layer.metrics import crf_accuracy, sequence_span_accuracy
 
 

@@ -1,0 +1,41 @@
+{
+  "use_tpu": false,
+  "data_source_scheme": "local",
+  "train": "/data/data/train.conllx",
+  "test": "/data/data/test.conllx",
+  "tags": "/data/data/entity.txt",
+  "vocabulary_file": "/data/data/unicode_char_list.txt",
+  "constraint": "/data/data/constraint.json",
+  "intent_field": "domain",
+  "shuffle_pool_size": 1000, 
+  "warm_start_dir": 
+  "dropout": 0.5,
+  "batch_size": 64,
+  "epochs": 35,
+  "max_steps": null,
+  "max_steps_without_increase": 15000,
+  "embedding_vocabulary_size": 7540,
+  "embedding_dim": 300,
+  "lstm_size": 100,
+  "max_sentence_len": 45,
+  "bilstm_stack_config":[
+     {
+      "units": 100, 
+      "dropout": 0.5, 
+      "recurrent_dropout": 0.5
+     }
+  ],
+  "result_dir": "/data/output",
+  "params_log_file": "/data/output/params.json",
+  "model_dir": "/data/output/model_dir",
+  "h5_model_file": "/data/output/h5_model/model.h5",
+  "saved_model_dir": "/data/output/saved_model",
+  "deliverable_model_dir": "/data/output/deliverable_model",
+  "summary_log_dir": "/data/output/summary_log_dir",
+  "save_checkpoints_secs": 60,
+  "throttle_secs": 60,
+  "tpu_name": "",
+  "tpu_zone": "",
+  "gcp_project": "",
+  "task_id": "ABC123"
+}

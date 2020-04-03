@@ -3,29 +3,31 @@ data_source_scheme: local
 train: "./data/train.conllx"
 test: "./data/test.conllx"
 tags: "./data/entity.txt"
-vocabulary_file: "./data/unicode_char_list.txt"
+vocabulary_file:
 shuffle_pool_size: 1000
+fine_tune:
+# True or False
 warm_start_dir:
 # "/Users/shf/test/docker/seq2annotation/output/model_dir/BilstmCrfModel-64-0.001-None-15000"
 
 # model configure
-batch_size: 32
+batch_size: 64
 epochs: 1
 dropout: 0.5
 intent_field: label
 max_steps:
 max_steps_without_increase: 15000
-embedding_vocabulary_size: 7540
+#embedding_vocabulary_size: 7540
 embedding_dim: 300
 lstm_size: 100
 regularizer_rate: 0.001
 use_attention_layer: false
 max_sentence_len: 45
 bilstm_stack_config: [
-{units: 100, recurrent_activation: 'hard_sigmoid', dropout: 0.2, recurrent_dropout: 0.5},
+#{units: 100, recurrent_activation: 'hard_sigmoid', dropout: 0.2, recurrent_dropout: 0.5},
 # {units: 100, activation: 'seq2annotation.tf.python.keras.activations.relu6', recurrent_activation: 'seq2annotation.tf.python.keras.activations.relu6'},
 ]
-optimizer_params: {lr: 0.001}
+optimizer_params: {learning_rate: 0.001}
 preprocess_hook: [
 # {class: 'ner_s2s.preprocess_hooks.corpus_drop.CorpusAugment'},
 ]

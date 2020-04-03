@@ -8,7 +8,7 @@ from deliverable_model.builder import (
     ModelBuilder,
 )
 from deliverable_model.builtin import LookupProcessor
-from deliverable_model.builtin.processor import BILUOEncodeProcessor, PadProcessor
+from deliverable_model.builtin.processor import BILUOEncodeProcessor, PadProcessor, StrTokensConvertProcessor
 
 
 def export_as_deliverable_model(
@@ -22,6 +22,7 @@ def export_as_deliverable_model(
     vocabulary_lookup_table=None,
     tag_lookup_table=None,
     padding_parameter=None,
+    str_tokens_convert_parameter=None,
     addition_model_dependency=None,
     custom_object_dependency=None,
 ):
@@ -90,6 +91,12 @@ def export_as_deliverable_model(
     processor_builder.add_postprocess(decoder_processor_handle)
     if vocabulary_lookup_table or tag_lookup_table:
         processor_builder.add_postprocess(lookup_processor_handle)
+
+    # add str_tokens_convert_processor
+    str_tokens_convert_processor = StrTokensConvertProcessor()
+    if str_tokens_convert_processor:
+        str_tokens_convert_processor_handle = processor_builder.add_processor(str_tokens_convert_processor)
+        processor_builder.add_preprocess(str_tokens_convert_processor_handle)
 
     processor_builder.save()
 

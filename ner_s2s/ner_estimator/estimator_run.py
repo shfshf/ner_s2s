@@ -5,7 +5,7 @@ from ner_s2s.ner_estimator.model import Model
 
 from typing import Any
 from deliverable_model.utils import create_dir_if_needed
-from ner_s2s.deliver_utils import export_as_deliverable_model
+from ner_s2s.deliverable_utils import export_as_deliverable_model
 from deliverable_model.converter_base import ConverterBase
 from seq2annotation_for_deliverable.main import (
     ConverterForRequest,

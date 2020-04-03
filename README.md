@@ -171,13 +171,27 @@ with tf.variable_scope("domain"):
 ...
 
 ```
+(ner_s2s.ner_estimator.algorithms.model.py)中 mode == tf.estimator.ModeKeys.TRAIN() 函数增加名为 fine_tune 的flag 参数
+```
+    if self.params["fine_tune"]:
+        output_vars1 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="domain")
+        output_vars2 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="input/Variable_1")
+        train_op = tf.train.AdamOptimizer( 
+            **self.params.get("optimizer_params", {})
+        ).minimize(loss, global_step=tf.train.get_or_create_global_step(), var_list=[output_vars1, output_vars2])
+    else:
+        train_op = tf.train.AdamOptimizer( 
+            **self.params.get("optimizer_params", {})
+        ).minimize(loss, global_step=tf.train.get_or_create_global_step())
+...
+```
 通过脚本载入模型，查看网络结构名和参数：
 ```
 [<tf.Variable 'input/Variable:0' shape=(7540,) dtype=string_ref>, <tf.Variable 'input/Variable_1:0' shape=(7541, 300) dtype=float32_ref>, 
-<tf.Variable 'domain/lstm_fused_cell/kernel:0' shape=(400, 400) dtype=float32_ref>, <tf.Variable 'domain/lstm_fused_cell/bias:0' shape=(400,) dtype=float32_ref>, 
-<tf.Variable 'domain/lstm_fused_cell_1/kernel:0' shape=(400, 400) dtype=float32_ref>, <tf.Variable 'domain/lstm_fused_cell_1/bias:0' shape=(400,) dtype=float32_ref>, 
-<tf.Variable 'domain/dense/kernel:0' shape=(200, 349) dtype=float32_ref>, <tf.Variable 'domain/dense/bias:0' shape=(349,) dtype=float32_ref>, 
-<tf.Variable 'domain/crf:0' shape=(349, 349) dtype=float32_ref>, <tf.Variable 'domain/Variable:0' shape=(349,) dtype=string_ref>]
+<tf.Variable 'input/lstm_fused_cell/kernel:0' shape=(400, 400) dtype=float32_ref>, <tf.Variable 'input/lstm_fused_cell/bias:0' shape=(400,) dtype=float32_ref>, 
+<tf.Variable 'input/lstm_fused_cell_1/kernel:0' shape=(400, 400) dtype=float32_ref>, <tf.Variable 'input/lstm_fused_cell_1/bias:0' shape=(400,) dtype=float32_ref>, 
+<tf.Variable 'domain/dense/kernel:0' shape=(200, 381) dtype=float32_ref>, <tf.Variable 'domain/dense/bias:0' shape=(381,) dtype=float32_ref>, 
+<tf.Variable 'domain/crf:0' shape=(381, 381) dtype=float32_ref>, <tf.Variable 'domain/Variable:0' shape=(381,) dtype=string_ref>]
 ```
 ### configure.yaml中增加可配置参数 warm_start_dir
 ```

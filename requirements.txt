@@ -9,7 +9,6 @@ cloudpickle==1.2.2
 configparser==4.0.2
 databricks-cli==0.9.1
 deepmerge==0.1.0
-# deliverable-model==0.2.0
 https://github.com/howl-anderson/deliverable_model/archive/develop.zip
 dill==0.3.1.1
 docker==4.1.0
@@ -61,7 +60,6 @@ requests==2.22.0
 scikit-learn==0.22.1
 scipy==1.4.1
 seq2annotation==0.9.1
-# seq2annotation-for-deliverable==0.1.0
 git+https://github.com/howl-anderson/seq2annotation_for_deliverable.git
 simplejson==3.17.0
 six==1.13.0

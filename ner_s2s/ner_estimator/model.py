@@ -46,7 +46,7 @@ class Model(object):
             "words": utils.join_path(data_dir, "./unicode_char_list.txt"),
             "lookup": utils.join_path(data_dir, "./lookup.txt"),
             "chars": utils.join_path(data_dir, "vocab.chars.txt"),
-            "tags": utils.join_path(data_dir, "./tags.txt"),
+            "tags": utils.join_path(data_dir, "./entity.txt"),
             "glove": utils.join_path(data_dir, "./glove.npz"),
             "model_dir": utils.join_path(result_dir, "model_dir"),
             "params_log_file": utils.join_path(result_dir, "params.json"),
@@ -68,7 +68,7 @@ class Model(object):
             "train_spec": {"max_steps": 5000},
             "eval_spec": {"throttle_secs": 60},
             "estimator": {"save_checkpoints_secs": 120},
-            "embedding": {"vocabulary_size": 128003},
+            "embedding": {"vocabulary_size": 7540},
             "use_tpu": False,
             "tpu_config": {"tpu_name": None, "zone": None, "gcp_project": None},
             "save_checkpoints_secs": 60,
@@ -77,8 +77,9 @@ class Model(object):
             "max_steps_without_increase": 1000,
             "train_hook": {},
             "shuffle_pool_size": 30,
-            "embedding_dim": 64,
+            "embedding_dim": 128,
             "regularizer_rate": 0.001,
+            "fine_tune": False,
         }
 
         vocab_data_file = self.native_config.get("vocabulary_file")

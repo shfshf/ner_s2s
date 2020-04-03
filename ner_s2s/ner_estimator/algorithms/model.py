@@ -283,8 +283,21 @@ class Model(object):
                     )
 
             elif self.mode == tf.estimator.ModeKeys.TRAIN:
-                train_op = tf.train.AdamOptimizer(self.params["learning_rate"]
-                                                  ).minimize(loss, global_step=tf.train.get_or_create_global_step())
+                if self.params["fine_tune"]:
+                    output_vars1 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="domain")
+                    output_vars2 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="input/Variable_1")
+                    train_op = tf.train.AdamOptimizer(
+                        **self.params.get("optimizer_params", {})
+                    ).minimize(loss, global_step=tf.train.get_or_create_global_step(), var_list=[output_vars1, output_vars2])
+                else:
+                    train_op = tf.train.AdamOptimizer(
+                        **self.params.get("optimizer_params", {})
+                    ).minimize(loss, global_step=tf.train.get_or_create_global_step())
+
+                # train_op = tf.train.AdamOptimizer(
+                #     **self.params.get("optimizer_params", {})
+                # ).minimize(loss, global_step=tf.train.get_or_create_global_step())
+
                 if self.params["use_tpu"]:
                     train_op = tf.contrib.tpu.CrossShardOptimizer(train_op)
 
