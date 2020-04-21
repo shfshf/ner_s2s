@@ -2,10 +2,9 @@ from ioflow.configure import read_configure
 from ioflow.corpus import get_corpus_processor
 from ner_s2s.input import build_input_func, generate_tagset
 from ner_s2s.ner_estimator.model import Model
+from ner_s2s.ner_estimator.estimator_utils import export_as_deliverable_model
 
-from typing import Any
 from deliverable_model.utils import create_dir_if_needed
-from ner_s2s.deliverable_utils import export_as_deliverable_model
 from deliverable_model.converter_base import ConverterBase
 from seq2annotation_for_deliverable.main import (
     ConverterForRequest,
@@ -56,7 +55,7 @@ def main():
         train_input_func, eval_input_func, config
     )
 
-    #  mlflow metrics
+    # mlflow metrics
     # mlflow.log_metrics(evaluate_result, step=100)
 
     # mlflow Logging the saved model
@@ -70,7 +69,7 @@ def main():
         tensorflow_saved_model=final_saved_model,
         converter_for_request=ConverterForRequest(),
         converter_for_response=ConverterForResponse(),
-        addition_model_dependency=["micro_toolkit"]
+        addition_model_dependency=["micro_toolkit", "seq2annotation_for_deliverable"],
     )
 
 

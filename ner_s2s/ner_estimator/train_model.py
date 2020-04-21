@@ -82,7 +82,7 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
         if config.get("warm_start_dir") is not None:
             ws = tf.estimator.WarmStartSettings(
                 ckpt_to_initialize_from=config.get("warm_start_dir"),
-                vars_to_warm_start=['input/Variable_1', 'domain/lstm_fused_cell'],
+                vars_to_warm_start=['input/Variable_1', 'input/lstm_fused_cell'],
                 # vars_to_warm_start='.*',
                 var_name_to_vocab_info=None,
                 var_name_to_prev_var_name=None)
@@ -97,22 +97,25 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
     # Path(estimator.eval_dir()).mkdir(parents=True, exist_ok=True)
     utils.create_dir_if_needed(estimator.eval_dir())
 
-    # hook_params = params['hook']['stop_if_no_increase']
-    # hook = tf.contrib.estimator.stop_if_no_increase_hook(
-    #     estimator, 'f1',
-    #     max_steps_without_increase=hook_params['max_steps_without_increase'],
-    #     min_steps=hook_params['min_steps'],
-    #     run_every_secs=hook_params['run_every_secs']
-    # )
-
     # build hooks from config
     train_hook = []
-    for i in config.get("train_hook", []):
-        class_ = class_from_module_path(i["class"])
-        params = i["params"]
-        if i.get("inject_whole_config", False):
-            params["config"] = config
-        train_hook.append(class_(**params))
+    if config.get("early_stop"):
+        hook_params = config.get('hook')['stop_if_no_increase']
+        hook_train = tf.estimator.experimental.stop_if_no_increase_hook(
+            estimator,
+            'f1',
+            max_steps_without_increase=hook_params['max_steps_without_increase'],
+            min_steps=hook_params['min_steps'],
+            run_every_secs=hook_params['run_every_secs']
+        )
+        train_hook = [hook_train]
+    else:
+        for i in config.get("train_hook", []):
+            class_ = class_from_module_path(i["class"])
+            params = i["params"]
+            if i.get("inject_whole_config", False):
+                params["config"] = config
+            train_hook.append(class_(**params))
 
     eval_hook = []
     for i in config.get("eval_hook", []):

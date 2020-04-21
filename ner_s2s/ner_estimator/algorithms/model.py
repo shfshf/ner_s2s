@@ -2,8 +2,7 @@ from pathlib import Path
 
 import tensorflow as tf
 import numpy as np
-from ner_s2s.ner_estimator.metrics import precision, recall, f1
-from tokenizer_tools.metrics import correct_rate
+from ner_s2s.metrics import precision, recall, f1, correct_rate
 
 
 class Model(object):
@@ -213,11 +212,10 @@ class Model(object):
             # indices, num_tags, word_ids, nwords = self.tpu_input_layer()
 
             embeddings = self.embedding_layer(word_ids)
+            data = self.call(embeddings, nwords)
+            data = self.dropout_layer(data)
 
         with tf.variable_scope("domain"):
-            data = self.call(embeddings, nwords)
-
-            data = self.dropout_layer(data)
             logits = self.dense_layer(data, num_tags)
 
             crf_params = tf.get_variable("crf", [num_tags, num_tags], dtype=tf.float32)

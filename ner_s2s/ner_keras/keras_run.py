@@ -12,17 +12,17 @@ from tensorflow.python.keras import optimizers
 from ioflow.configure import read_configure
 from ioflow.corpus import get_corpus_processor
 from ner_s2s.input import generate_tagset, Lookuper, index_table_from_file
+from ner_s2s.ner_keras.keras_utils import export_as_deliverable_model
 from ner_s2s.utils import create_dir_if_needed, create_file_dir_if_needed
 from tokenizer_tools.tagset.converter.offset_to_biluo import offset_to_biluo
 from tf_attention_layer.layers.global_attentioin_layer import GlobalAttentionLayer
 from tf_crf_layer.layer import CRF
 from tf_crf_layer.loss import ConditionalRandomFieldLoss
-from tf_crf_layer.metrics import (
-    SequenceCorrectness,
-    SequenceSpanAccuracy
+from tf_crf_layer.metrics import SequenceCorrectness, SequenceSpanAccuracy
+from deliverable_model.builtin.converter.identical_converters import (
+    ConverterForRequest,
+    ConverterForResponse,
 )
-
-from ner_s2s.deliver_utils import export_as_deliverable_model
 
 # tf.enable_eager_execution()
 
@@ -43,6 +43,13 @@ def main():
 
     tag_lookuper = Lookuper({v: i for i, v in enumerate(tags_data)})  # tag index
     vocab_data_file = config.get("vocabulary_file")
+
+    if not vocab_data_file:
+        # load built in vocabulary file
+        vocab_data_file = os.path.join(
+            os.path.dirname(__file__), "../data/unicode_char_list.txt"
+        )
+
     vocabulary_lookuper = index_table_from_file(vocab_data_file)
 
     def preprocss(data, maxlen):
@@ -94,7 +101,7 @@ def main():
         "use_batch_normalization_after_bilstm", False
     )
     CRF_PARAMS = config.get("crf_params", {})
-    OPTIMIZER_PARAMS = config.get("optimizer_params", {})
+    OPTIMIZER_PARAMS = config.get("optimizer_params_keras", {})
 
     vacab_size = vocabulary_lookuper.size()
     tag_size = tag_lookuper.size()
@@ -160,14 +167,17 @@ def main():
     )
 
     # Save the model
-    model.save(create_file_dir_if_needed(config["h5_model_file"]))
+    # model.save(create_file_dir_if_needed(config["h5_model_file"]))
 
-    tf.keras.experimental.export_saved_model(
-        model, create_dir_if_needed(config["saved_model_dir"]))
+    # tf.keras.experimental.export_saved_model(
+    #     model, create_dir_if_needed(config["saved_model_dir"])
+    # )
 
     export_as_deliverable_model(
         create_dir_if_needed(config["deliverable_model_dir"]),
         keras_saved_model=config["saved_model_dir"],
+        converter_for_request=ConverterForRequest(),
+        converter_for_response=ConverterForResponse(),
         vocabulary_lookup_table=vocabulary_lookuper,
         tag_lookup_table=tag_lookuper,
         padding_parameter={"maxlen": MAX_SENTENCE_LEN, "value": 0, "padding": "post"},

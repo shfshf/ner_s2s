@@ -60,9 +60,9 @@ class Model(object):
             "saved_model_dir": utils.join_path(result_dir, "saved_model"),
             "hook": {
                 "stop_if_no_increase": {
-                    "min_steps": 100,
-                    "run_every_secs": 60,
-                    "max_steps_without_increase": 20,
+                    "min_steps": 8000,
+                    "run_every_secs": 120,
+                    "max_steps_without_increase": 1000,
                 }
             },
             "train_spec": {"max_steps": 5000},
@@ -80,6 +80,7 @@ class Model(object):
             "embedding_dim": 128,
             "regularizer_rate": 0.001,
             "fine_tune": False,
+            "early_stop": False,
         }
 
         vocab_data_file = self.native_config.get("vocabulary_file")
@@ -87,7 +88,7 @@ class Model(object):
         if not vocab_data_file:
             # no vocabulary file provided, use internal one
             vocab_data_file = pkg_resources.resource_filename(
-                __name__, "./data/unicode_char_list.txt"
+                __name__, "../data/unicode_char_list.txt"
             )
         params["vocab_data"] = np.loadtxt(
             vocab_data_file, dtype=np.unicode, comments=None, encoding=None

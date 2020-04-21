@@ -201,6 +201,9 @@ warm_start_dir:
 # 启用热启动，其中"/home/shf/conda/ner/seq2annotation/model_dir/BilstmCrfModel-64-0.001-None-15000"为大模型results生成的checkpoint的绝对路径
 warm_start_dir: "/home/shf/conda/ner/seq2annotation/model_dir/BilstmCrfModel-64-0.001-None-15000"
 
+# 是否启动迁移学习的flag参数开关
+fine_tune: 
+# True or False
 ```
 
 ### estimator训练中增加增加参数 warm_start_from
@@ -216,7 +219,7 @@ warm_start_dir: "/home/shf/conda/ner/seq2annotation/model_dir/BilstmCrfModel-64-
             # vars_to_warm_start='.*domain/lstm_fused_cell.*', # checkpoint 只读入所有的lstm层
             # vars_to_warm_start='^(?!.*dense)',     # checkpoint 读入除了dense的所有层
             # vars_to_warm_start='.*',           # checkpoint 读入所有的神经网络层   
-            vars_to_warm_start=['input/Variable_1', 'domain/lstm_fused_cell'],   # checkpoint 读入输入的embedding层与所有的lstm层      
+            vars_to_warm_start=['input/Variable_1', 'input/lstm_fused_cell'],   # checkpoint 读入输入的embedding层与所有的lstm层      
             var_name_to_vocab_info=None,
             var_name_to_prev_var_name=None)
         estimator = tf.estimator.Estimator(
@@ -228,3 +231,64 @@ warm_start_dir: "/home/shf/conda/ner/seq2annotation/model_dir/BilstmCrfModel-64-
         )
 
 ```
+### 在 tf.train.AdamOptimizer优化器中增加可配置flag参数 "fine_tune"
+(ner_s2s.ner_estimator.algorithms.model.py)中 self.mode == tf.estimator.ModeKeys.TRAIN 函数增加可配置flag参数 "fine_tune"
+* if fine_tune 为 True，冻结lstm层参数，只将embedding层与lstm后面的dense层以及crf层的都参与进行更新参数
+* if fine_tune 为 False，min loss计算的时候更新所有层的参数
+```
+     if self.params["fine_tune"]:
+        output_vars1 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="domain")
+        output_vars2 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="input/Variable_1")
+        train_op = tf.train.AdamOptimizer(
+            **self.params.get("optimizer_params", {})
+        ).minimize(loss, global_step=tf.train.get_or_create_global_step(), var_list=[output_vars1, output_vars2])
+     else:
+        train_op = tf.train.AdamOptimizer(
+            **self.params.get("optimizer_params", {})
+        ).minimize(loss, global_step=tf.train.get_or_create_global_step())
+```
+## early_stop(早停法-保存最优模型)
+(ner_s2s.ner_estimator.train_model.py)中 tf.estimator.TrainSpec与estimator.train函数处理train_hook的时候，
+hooks=train_hook 中进行配置
+* if early_stop 为 True，在训练epoch轮数时，通过配置项参数对 f1 的指标进行控制，在一定时间或者步数后没有增长，即认为此时的model是最优的模型
+* if early_stop 为 False，训一直练完我们设置的轮数，保存最后的模型
+```
+ # build hooks from config
+    train_hook = []
+    if config.get("early_stop"):
+        hook_params = config.get('hook')['stop_if_no_increase']
+        hook_train = tf.estimator.experimental.stop_if_no_increase_hook(
+            estimator,
+            'f1',
+            max_steps_without_increase=hook_params['max_steps_without_increase'],
+            min_steps=hook_params['min_steps'],
+            run_every_secs=hook_params['run_every_secs']
+        )
+        train_hook = [hook_train]
+    else:
+        for i in config.get("train_hook", []):
+            class_ = class_from_module_path(i["class"])
+            params = i["params"]
+            if i.get("inject_whole_config", False):
+                params["config"] = config
+            train_hook.append(class_(**params))
+```
+(ner_s2s.ner_estimator.model.py)中，配置hook默认参数（需调试）
+```
+    "hook": {
+        "stop_if_no_increase": {
+            "min_steps": 8000,
+            "run_every_secs": 120,
+            "max_steps_without_increase": 1000,
+        }
+    },
+    # fine_tune与early_stop默认参数配置
+    "fine_tune": False,
+    "early_stop": False,
+```
+configure.yaml中增加可配置参数 early_stop
+```
+early_stop: 
+# True or False
+```
+
