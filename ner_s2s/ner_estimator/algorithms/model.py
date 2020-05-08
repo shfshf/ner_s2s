@@ -15,7 +15,7 @@ class Model(object):
         return cls.__name__
 
     @classmethod
-    def model_fn(cls, features, labels, mode, params):
+    def smodel_fn(cls, features, labels, mode, params):
         instance = cls(features, labels, mode, params)
         return instance()
 
@@ -24,16 +24,6 @@ class Model(object):
         self.labels = labels
         self.mode = mode
         self.params = params
-
-    def tpu_input_layer(self):
-        word_ids = self.features["words"]
-
-        nwords = tf.identity(self.features["words_len"], name="input_words_len")
-
-        indices = self.params["_indices"]
-        num_tags = self.params["_num_tags"]
-
-        return indices, num_tags, word_ids, nwords
 
     def input_layer(self):
         # data = np.loadtxt(self.params['vocab'], dtype=np.unicode, encoding=None)
@@ -83,26 +73,26 @@ class Model(object):
         # glove = np.load(params['glove'])['embeddings']  # np.array
 
         # training the embedding during training
-        # glove = np.zeros(
-        #     (self.params["embedding_vocabulary_size"], self.params["embedding_dim"]),
-        #     dtype=np.float32,
-        # )
-        #
-        # # Add OOV word embedding
-        # embedding_array = np.vstack([glove, [[0.0] * self.params["embedding_dim"]]])
-        #
-        # embedding_variable = tf.Variable(
-        #     embedding_array, dtype=tf.float32, trainable=True
-        # )
-
-        embedding_variable = tf.get_variable(
-            'embedding_variable',
-            shape=(self.params["embedding_vocabulary_size"] + 1, self.params["embedding_dim"]),
-            dtype=tf.float32,
-            initializer=tf.contrib.layers.xavier_initializer(),
-            regularizer=tf.contrib.layers.l2_regularizer(self.params["regularizer_rate"]),
-            trainable=True
+        glove = np.zeros(
+            (self.params["embedding_vocabulary_size"], self.params["embedding_dim"]),
+            dtype=np.float32,
         )
+
+        # Add OOV word embedding
+        embedding_array = np.vstack([glove, [[0.0] * self.params["embedding_dim"]]])
+
+        embedding_variable = tf.Variable(
+            embedding_array, dtype=tf.float32, trainable=True
+        )
+
+        # embedding_variable = tf.get_variable(
+        #     'embedding_variable',
+        #     shape=(self.params["embedding_vocabulary_size"] + 1, self.params["embedding_dim"]),
+        #     dtype=tf.float32,
+        #     initializer=tf.contrib.layers.xavier_initializer(),
+        #     regularizer=tf.contrib.layers.l2_regularizer(self.params["regularizer_rate"]),
+        #     trainable=True
+        # )
 
         embeddings = tf.nn.embedding_lookup(embedding_variable, word_ids)
 
@@ -228,14 +218,9 @@ class Model(object):
         # print(word_strings)
 
         if self.mode == tf.estimator.ModeKeys.PREDICT:
-            predictions = {"pred_ids": pred_ids, "tags": pred_strings}
 
-            if self.params["use_tpu"]:
-                return tf.contrib.tpu.TPUEstimatorSpec(
-                    self.mode, predictions=predictions
-                )
-            else:
-                return tf.estimator.EstimatorSpec(self.mode, predictions=predictions)
+            predictions = {"pred_ids": pred_ids, "tags": pred_strings}
+            return tf.estimator.EstimatorSpec(self.mode, predictions=predictions)
         else:
             # true_tag_ids = self.labels
             true_tag_ids = self.tag2id(self.labels, "labels")
@@ -250,68 +235,36 @@ class Model(object):
             )
 
             if self.mode == tf.estimator.ModeKeys.EVAL:
-                if self.params["use_tpu"]:
 
-                    def my_metric_fn(true_tag_ids, pred_ids, num_tags, indices, nwords):
-                        return self.compute_metrics(
-                            true_tag_ids, pred_ids, num_tags, indices, nwords
-                        )
-
-                    return tf.contrib.tpu.TPUEstimatorSpec(
-                        self.mode,
-                        loss=loss,
-                        eval_metrics=(
-                            my_metric_fn,
-                            [true_tag_ids, pred_ids, num_tags, indices, nwords],
-                        ),
-                    )
-                else:
-                    # set up metrics reporter
-                    # from ioflow.hooks.metrics_reporter import metrics_report_hook
-                    # hook_class = metrics_report_hook(self.params)
-                    # hook_metrics = {"eval_loss": loss}
-                    # hook_metrics.update({'_'.join(['eval', k]): v[0] for k, v in metrics.items()})
-                    # hook = hook_class(hook_metrics)
-
-                    # return tf.estimator.EstimatorSpec(
-                    #     self.mode, loss=loss, eval_metric_ops=metrics, evaluation_hooks=[hook])
-
-                    return tf.estimator.EstimatorSpec(
-                        self.mode, loss=loss, eval_metric_ops=metrics
-                    )
+                return tf.estimator.EstimatorSpec(
+                    self.mode, loss=loss, eval_metric_ops=metrics
+                )
 
             elif self.mode == tf.estimator.ModeKeys.TRAIN:
+
+                global_step = tf.train.get_or_create_global_step()
+                learning_rate = tf.train.exponential_decay(
+                    self.params["learning_rate"],
+                    global_step,
+                    decay_steps=self.params["lr_decay_steps"],
+                    decay_rate=self.params["lr_decay_rate"],
+                    staircase=True
+                )
                 if self.params["fine_tune"]:
                     output_vars1 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="domain")
                     output_vars2 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="input/Variable_1")
                     train_op = tf.train.AdamOptimizer(
-                        **self.params.get("optimizer_params", {})
-                    ).minimize(loss, global_step=tf.train.get_or_create_global_step(), var_list=[output_vars1, output_vars2])
+                        # learning_rate=self.params["learning_rate"]
+                        # **self.params.get("optimizer_params", {})
+                        learning_rate=learning_rate
+                    ).minimize(loss, global_step=global_step, var_list=[output_vars1, output_vars2])
                 else:
                     train_op = tf.train.AdamOptimizer(
-                        **self.params.get("optimizer_params", {})
-                    ).minimize(loss, global_step=tf.train.get_or_create_global_step())
+                        # **self.params.get("optimizer_params", {})
+                        # self.params["learning_rate"]
+                        learning_rate=learning_rate
+                    ).minimize(loss, global_step=global_step)
 
-                # train_op = tf.train.AdamOptimizer(
-                #     **self.params.get("optimizer_params", {})
-                # ).minimize(loss, global_step=tf.train.get_or_create_global_step())
-
-                if self.params["use_tpu"]:
-                    train_op = tf.contrib.tpu.CrossShardOptimizer(train_op)
-
-                if self.params["use_tpu"]:
-                    return tf.contrib.tpu.TPUEstimatorSpec(
-                        self.mode, loss=loss, train_op=train_op
-                    )
-                else:
-                    # set up metrics reporter
-                    # from ioflow.hooks.metrics_reporter import metrics_report_hook
-                    # hook_class = metrics_report_hook(self.params)
-                    # hook = hook_class({"train_loss": loss})
-
-                    # return tf.estimator.EstimatorSpec(
-                    #     self.mode, loss=loss, train_op=train_op, training_hooks=[hook])
-
-                    return tf.estimator.EstimatorSpec(
-                        self.mode, loss=loss, train_op=train_op
-                    )
+                return tf.estimator.EstimatorSpec(
+                    self.mode, loss=loss, train_op=train_op
+                )

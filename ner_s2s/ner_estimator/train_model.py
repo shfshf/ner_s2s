@@ -47,52 +47,20 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
 
     instance_model_dir = os.path.join(config["model_dir"], model_specific_name)
 
-    if config["use_tpu"]:
-        tpu_cluster_resolver = tf.contrib.cluster_resolver.TPUClusterResolver(
-            tpu=config["tpu_name"],
-            zone=config["tpu_zone"],
-            project=config["gcp_project"],
-        )
-
-        run_config = tf.contrib.tpu.RunConfig(
-            cluster=tpu_cluster_resolver,
-            model_dir=instance_model_dir,
-            session_config=tf.ConfigProto(
-                allow_soft_placement=True, log_device_placement=True
-            ),
-            tpu_config=tf.contrib.tpu.TPUConfig(),
-        )
-
-        tpu_estimator_params = copy.deepcopy(estimator_params)
-        # remove reserved keys
-        # tpu_estimator_params['train_batch_size'] = tpu_estimator_params['batch_size']
-        del tpu_estimator_params["batch_size"]
-        # del tpu_estimator_params['context']
-
-        estimator = tf.contrib.tpu.TPUEstimator(
-            model_fn=model_fn,
-            params=tpu_estimator_params,
-            config=run_config,
-            use_tpu=True,
-            train_batch_size=estimator_params["batch_size"],
-            eval_batch_size=estimator_params["batch_size"],
-            predict_batch_size=estimator_params["batch_size"],
+    if config.get("warm_start_dir") is not None:
+        ws = tf.estimator.WarmStartSettings(
+            ckpt_to_initialize_from=config.get("warm_start_dir"),
+            vars_to_warm_start=['input/Variable_1', 'input/lstm_fused_cell'],
+            # vars_to_warm_start='.*',
+            var_name_to_vocab_info=None,
+            var_name_to_prev_var_name=None)
+        estimator = tf.estimator.Estimator(
+            model_fn, instance_model_dir, cfg, estimator_params, warm_start_from=ws
         )
     else:
-        if config.get("warm_start_dir") is not None:
-            ws = tf.estimator.WarmStartSettings(
-                ckpt_to_initialize_from=config.get("warm_start_dir"),
-                vars_to_warm_start=['input/Variable_1', 'input/lstm_fused_cell'],
-                # vars_to_warm_start='.*',
-                var_name_to_vocab_info=None,
-                var_name_to_prev_var_name=None)
-            estimator = tf.estimator.Estimator(
-                model_fn, instance_model_dir, cfg, estimator_params, warm_start_from=ws
-            )
-        else:
-            estimator = tf.estimator.Estimator(
-                model_fn, instance_model_dir, cfg, estimator_params, warm_start_from=None
-            )
+        estimator = tf.estimator.Estimator(
+            model_fn, instance_model_dir, cfg, estimator_params, warm_start_from=None
+        )
 
     # Path(estimator.eval_dir()).mkdir(parents=True, exist_ok=True)
     utils.create_dir_if_needed(estimator.eval_dir())
@@ -140,25 +108,6 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
             input_fn=train_inpf, hooks=train_hook, max_steps=config["max_steps"]
         )
         evaluate_result, export_results = {}, None
-
-        # # Write predictions to file
-    # def write_predictions(name):
-    #     output_file = preds_file(name)
-    #     with tf.io.gfile.GFile(output_file, 'w') as f:
-    #         test_inpf = functools.partial(input_fn, fwords(name))
-    #         golds_gen = generator_fn(fwords(name))
-    #         preds_gen = estimator.predict(test_inpf)
-    #         for golds, preds in zip(golds_gen, preds_gen):
-    #             ((words, _), tags) = golds
-    #             preds_tags = [i.decode() for i in preds['tags']]
-    #             for word, tag, tag_pred in zip(words, tags, preds_tags):
-    #                 # f.write(b' '.join([word, tag, tag_pred]) + b'\n')
-    #                 f.write(' '.join([word, tag, tag_pred]) + '\n')
-    #             # f.write(b'\n')
-    #             f.write('\n')
-    #
-    # for name in ['train', 'test']:
-    #     write_predictions(name)
 
     # export saved_model
     feature_spec = {
