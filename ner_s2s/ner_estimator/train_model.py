@@ -47,20 +47,19 @@ def train_model(train_inpf, eval_inpf, config, model_fn, model_name):
 
     instance_model_dir = os.path.join(config["model_dir"], model_specific_name)
 
-    if config.get("warm_start_dir") is not None:
-        ws = tf.estimator.WarmStartSettings(
+    warm_start_setting = None
+    if config.get("warm_start_dir"):
+        warm_start_setting = tf.estimator.WarmStartSettings(
             ckpt_to_initialize_from=config.get("warm_start_dir"),
-            vars_to_warm_start=['input/Variable_1', 'input/lstm_fused_cell'],
-            # vars_to_warm_start='.*',
-            var_name_to_vocab_info=None,
-            var_name_to_prev_var_name=None)
-        estimator = tf.estimator.Estimator(
-            model_fn, instance_model_dir, cfg, estimator_params, warm_start_from=ws
+            vars_to_warm_start=[
+                'task_independent/Variable_1',
+                'task_independent/lstm_fused_cell'
+            ],
+            # vars_to_warm_start='.*'  # all warm_start
         )
-    else:
-        estimator = tf.estimator.Estimator(
-            model_fn, instance_model_dir, cfg, estimator_params, warm_start_from=None
-        )
+    estimator = tf.estimator.Estimator(
+        model_fn, instance_model_dir, cfg, estimator_params, warm_start_from=warm_start_setting
+    )
 
     # Path(estimator.eval_dir()).mkdir(parents=True, exist_ok=True)
     utils.create_dir_if_needed(estimator.eval_dir())

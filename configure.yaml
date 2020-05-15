@@ -3,26 +3,27 @@ data_source_scheme: local
 train: "./data/train.conllx"
 test: "./data/test.conllx"
 tags: "./data/entity.txt"
-vocabulary_file: "./data/unicode_char_list.txt"
+vocabulary_file: ""
 # "./data/unicode_char_list.txt"
 shuffle_pool_size: 1000
 early_stop:
 # True or False
-fine_tune: True
-# True or False
-warm_start_dir: "/home/shf/conda/ner/ner_s2s/output/model_dir/BilstmCrfModel-64-0.001-None-15000"
+#fine_tune: True
+warm_start_dir: ""
 #  "/home/shf/conda/ner/ner_s2s/output/model_dir/BilstmCrfModel-64-0.001-None-15000"
+# "/Users/shf/PycharmProjects/ner_s2s/output/model_dir/BilstmCrfModel-64-0.001-None-15000"
 
 # model configure
 batch_size: 64
-epochs: 35
-dropout: 0.5
+epochs: 3
+dropout: 0
+#0.5
 intent_field: label
 max_steps:
 max_steps_without_increase: 15000
 #embedding_vocabulary_size: 7540
-embedding_dim: 200
-lstm_size: 100
+embedding_dim: 300
+lstm_size: 128
 # 128
 regularizer_rate: 0.001
 use_attention_layer: false
@@ -40,7 +41,7 @@ use_batch_normalization_after_embedding: false
 use_batch_normalization_after_bilstm: false
 crf_params: {use_boundary: true}
 learning_rate: 0.001
-lr_decay_steps: 20000
+lr_decay_steps: 15000
 lr_decay_rate: 0.96
 
 # Data output

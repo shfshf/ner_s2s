@@ -15,7 +15,7 @@ class Model(object):
         return cls.__name__
 
     @classmethod
-    def smodel_fn(cls, features, labels, mode, params):
+    def model_fn(cls, features, labels, mode, params):
         instance = cls(features, labels, mode, params)
         return instance()
 
@@ -101,6 +101,12 @@ class Model(object):
     def dropout_layer(self, data):
         training = self.mode == tf.estimator.ModeKeys.TRAIN
         output = tf.layers.dropout(data, rate=self.params["dropout"], training=training)
+
+        return output
+
+    def layer_normalization_layer(self, data):
+        training = self.mode == tf.estimator.ModeKeys.TRAIN
+        output = tf.contrib.layers.layer_norm(data, trainable=training)
 
         return output
 
@@ -197,21 +203,24 @@ class Model(object):
         raise NotImplementedError
 
     def __call__(self):
-        with tf.variable_scope("input"):
+        with tf.variable_scope("task_independent"):
             indices, num_tags, word_ids, nwords = self.input_layer()
-            # indices, num_tags, word_ids, nwords = self.tpu_input_layer()
 
             embeddings = self.embedding_layer(word_ids)
-            data = self.call(embeddings, nwords)
-            data = self.dropout_layer(data)
 
-        with tf.variable_scope("domain"):
+            data = self.call(embeddings, nwords)
+
+        data = self.dropout_layer(data)
+        data = self.layer_normalization_layer(data)
+
+        with tf.variable_scope("task_dependent"):
             logits = self.dense_layer(data, num_tags)
 
             crf_params = tf.get_variable("crf", [num_tags, num_tags], dtype=tf.float32)
 
             pred_ids = self.crf_decode_layer(logits, crf_params, nwords)
-            pred_strings = self.id2tag(pred_ids, name="predict")
+
+        pred_strings = self.id2tag(pred_ids, name="predict")
 
         # word_strings = self.id2word(word_ids, name='word_strings')
 
@@ -250,20 +259,19 @@ class Model(object):
                     decay_rate=self.params["lr_decay_rate"],
                     staircase=True
                 )
-                if self.params["fine_tune"]:
-                    output_vars1 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="domain")
-                    output_vars2 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="input/Variable_1")
-                    train_op = tf.train.AdamOptimizer(
-                        # learning_rate=self.params["learning_rate"]
-                        # **self.params.get("optimizer_params", {})
-                        learning_rate=learning_rate
-                    ).minimize(loss, global_step=global_step, var_list=[output_vars1, output_vars2])
-                else:
-                    train_op = tf.train.AdamOptimizer(
-                        # **self.params.get("optimizer_params", {})
-                        # self.params["learning_rate"]
-                        learning_rate=learning_rate
-                    ).minimize(loss, global_step=global_step)
+
+                # if self.params["fine_tune"]:
+                var_list = None
+                if self.params["warm_start_dir"]:
+                    output_vars1 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="task_dependent")
+                    output_vars2 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="task_independent/Variable_1")
+                    var_list = [output_vars1, output_vars2]
+
+                train_op = tf.train.AdamOptimizer(
+                    # learning_rate=self.params["learning_rate"]
+                    # **self.params.get("optimizer_params", {})
+                    learning_rate=learning_rate
+                ).minimize(loss, global_step=global_step, var_list=var_list)
 
                 return tf.estimator.EstimatorSpec(
                     self.mode, loss=loss, train_op=train_op

@@ -247,6 +247,50 @@ fine_tune:
             **self.params.get("optimizer_params", {})
         ).minimize(loss, global_step=tf.train.get_or_create_global_step())
 ```
+## 动态设置 learning_rate
+
+在模型训练的时候，通过对优化器adam中的learning_rate的值进行动态的调整
+```
+  self.mode == tf.estimator.ModeKeys.TRAIN:
+
+        global_step = tf.train.get_or_create_global_step()
+        learning_rate = tf.train.exponential_decay(
+            self.params["learning_rate"],
+            global_step,
+            decay_steps=self.params["lr_decay_steps"],
+            decay_rate=self.params["lr_decay_rate"],
+            staircase=True
+        )
+        if self.params["fine_tune"]:
+            output_vars1 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="domain")
+            output_vars2 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="input/Variable_1")
+            train_op = tf.train.AdamOptimizer(
+                # learning_rate=self.params["learning_rate"]
+                # **self.params.get("optimizer_params", {})
+                learning_rate=learning_rate
+            ).minimize(loss, global_step=global_step, var_list=[output_vars1, output_vars2])
+        else:
+
+            train_op = tf.train.AdamOptimizer(
+                # **self.params.get("optimizer_params", {})
+                # self.params["learning_rate"]
+                learning_rate=learning_rate
+            ).minimize(loss, global_step=global_step)
+
+```
+### configure.yaml中增加可配置参数 learning_rate，lr_decay_steps，lr_decay_rate
+lr 在初始学习率的基础上，每经过全局一定的步数，乘以一定的系数，
+在模型训练到后期，降低模型准确率的震荡幅度，找到最高点。
+
+根据不同的数据量集，可以调试不同的 lr 超参数
+```
+# lr的初始值，一般为 0.001
+learning_rate: 0.004
+# 每经过全局的步数
+lr_decay_steps: 20000
+# lr 乘的系数
+lr_decay_rate: 0.96
+```
 ## early_stop(早停法-保存最优模型)
 (ner_s2s.ner_estimator.train_model.py)中 tf.estimator.TrainSpec与estimator.train函数处理train_hook的时候，
 hooks=train_hook 中进行配置
