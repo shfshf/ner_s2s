@@ -105,8 +105,7 @@ class Model(object):
         return output
 
     def layer_normalization_layer(self, data):
-        training = self.mode == tf.estimator.ModeKeys.TRAIN
-        output = tf.contrib.layers.layer_norm(data, trainable=training)
+        output = tf.contrib.layers.layer_norm(data)
 
         return output
 
@@ -251,16 +250,29 @@ class Model(object):
 
             elif self.mode == tf.estimator.ModeKeys.TRAIN:
 
+                optimizer_params = self.params.get("optimizer_params", {})
                 global_step = tf.train.get_or_create_global_step()
-                learning_rate = tf.train.exponential_decay(
-                    self.params["learning_rate"],
-                    global_step,
-                    decay_steps=self.params["lr_decay_steps"],
-                    decay_rate=self.params["lr_decay_rate"],
-                    staircase=True
-                )
 
-                # if self.params["fine_tune"]:
+                # apply learning rate decay if it's setup already.
+                lr_decay_params = optimizer_params.pop("learning_rate_exp_decay", {})
+
+                # learning_rate = tf.train.exponential_decay(
+                #     self.params["learning_rate"],
+                #     global_step,
+                #     decay_steps=self.params["lr_decay_steps"],
+                #     decay_rate=self.params["lr_decay_rate"],
+                #     staircase=True
+                # )
+                if lr_decay_params:
+                    learning_rate = tf.train.exponential_decay(
+                        lr_decay_params["learning_rate"],
+                        global_step,
+                        decay_steps=lr_decay_params["lr_decay_steps"],
+                        decay_rate=lr_decay_params["lr_decay_rate"],
+                        staircase=lr_decay_params.get("staircase", True),
+                    )
+                    optimizer_params["learning_rate"] = learning_rate
+
                 var_list = None
                 if self.params["warm_start_dir"]:
                     output_vars1 = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="task_dependent")
@@ -270,7 +282,8 @@ class Model(object):
                 train_op = tf.train.AdamOptimizer(
                     # learning_rate=self.params["learning_rate"]
                     # **self.params.get("optimizer_params", {})
-                    learning_rate=learning_rate
+                    # learning_rate=learning_rate
+                    **optimizer_params
                 ).minimize(loss, global_step=global_step, var_list=var_list)
 
                 return tf.estimator.EstimatorSpec(
