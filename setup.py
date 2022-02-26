@@ -21,7 +21,7 @@ install_requires = [
     "deliverable-model",
     "gunicorn",
     "micro_toolkit",
-    "mlflow==1.3.0",
+    "mlflow==1.23.1",
 ]
 
 
