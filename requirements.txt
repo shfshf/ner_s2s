@@ -47,7 +47,7 @@ pconf==1.7.0
 pluggy==0.13.1
 prometheus-client==0.7.1
 prometheus-flask-exporter==0.12.1
-protobuf==3.11.2
+protobuf==3.18.3
 py==1.8.1
 pyparsing==2.4.6
 pytest==5.3.2
