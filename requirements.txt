@@ -2,7 +2,7 @@ absl-py==0.9.0
 alembic==1.3.2
 astor==0.8.1
 attrs==19.3.0
-certifi==2019.11.28
+certifi==2022.12.7
 chardet==3.0.4
 Click==7.0
 cloudpickle==1.2.2
